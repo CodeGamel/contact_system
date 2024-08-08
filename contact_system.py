@@ -6,7 +6,8 @@ from functions import delete_contacts
 from functions import search_contact
 from functions import import_contacts
 from functions import export_to_contacts
-
+import re
+import sys
 
 contacts = {}
 
@@ -46,6 +47,8 @@ def main():
             import_contacts(contacts)
             print(contacts)
         if ans == '8':
-            quit
+            print("Thanks for using Gamel's Contact system")
+            sys.exit()
+
 
 main()

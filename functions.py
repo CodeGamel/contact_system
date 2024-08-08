@@ -5,17 +5,37 @@ with open ('Contacts.txt', 'w') as file:
     file.write('This is your list on contacts\n')
 
 with open ('Import.txt', 'w') as file:
-    file.write('Importing this list of contacts\n')
+    file.write('\n')
 
 def import_contacts(contacts):
+    phone_pattern = re.compile(r'^\(\d{3}\) \d{3}-\d{4}$')
+    email_pattern = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$') 
     try:
        with open ('import.txt', 'r') as import_file:
         import_content = import_file.readlines()
         
         with open('Contacts.txt', 'a') as contacts_file:
-            contacts_content = contacts_file.readlines()
-            contacts_file.writelines(contacts_content)
+            contacts_file.writelines(import_content)
             print('File imported successfully')
+        for line in import_content:
+            parts = line.strip().split(':')
+            if len(parts) == 5:
+                unique_id, name, phone, email, notes = [part.strip() for part in parts]
+                if not phone_pattern.match(phone):
+                    phone = 'Invalid phone'
+                
+                if not email_pattern.match(email):
+                    email = 'Invalid email'
+                
+                contacts[unique_id] = {
+                    'name': name,
+                    'phone': phone,
+                    'email': email,
+                    'notes': notes
+                }
+                
+    except ValueError:
+        print("No contacts found")
     
     except FileNotFoundError:
         print("File not found")
@@ -24,7 +44,7 @@ def import_contacts(contacts):
         print('Unexpected Error occured')
 
 def add_contact(contacts):
-    name = input("What is your contact's name?\n")
+    name = input("\nWhat is your contact's name?")
     
     email = input('Input Email: ')
     
@@ -40,7 +60,7 @@ def add_contact(contacts):
         print("Invalid phone number format. Please use (123) 456-7890.")
         return
     
-    notes = input('Any notes?\n')
+    notes = input('Any notes?')
     
     contacts[name] = {
         'Number': number,
@@ -89,6 +109,7 @@ def display_contacts(contacts):
     try:
         with open('Contacts.txt', 'r') as file:
             content = file.read()
+            
     except FileNotFoundError:
         print("This contact was not found")
     
@@ -101,7 +122,6 @@ def delete_contacts(contacts):
     if name in contacts:
         del contacts[name]
         with open('Contacts.txt','w') as file:
-            file.write('This is your list of contacts\n')
             for name, details in contacts.items():
                 file.write(f"{name}: {details['Number']}: {details['Email']}: {details['Notes']}\n")
         print(f'{name} has been removed from your contacts.')
@@ -119,18 +139,23 @@ def search_contact(contacts):
     else:
         print("Contact could not be found")
 
-def export_to_contacts(data, file='Contacts.txt'):
-    phone = re.compile(r'^\(\d{3}\) \d{3}-\d{4}$')
-    email = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-    with open ('Contacts.txt', 'w',) as f:
-        for contact in data:
-            name = contact.get('name', '')
-            phone= contact.get('phone', '')
-            email = contact.get('email', '')
-            if not phone:
-                print (f"Invalid phone number for {name}")
-                continue
-            if not email:
-                print (f"Invalid email for {name}")
-                continue
-            print([name, phone, email])
+def export_to_contacts(data, file='export.txt'):
+    phone_pattern = re.compile(r'^\(\d{3}\) \d{3}-\d{4}$')
+    email_pattern = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    
+    with open(file, 'w') as f:
+        for unique_id, details in contacts.items():
+            phone = {details[phone]}
+            email = {details[email]}
+            name = {details[name]}
+            notes = {details[notes]}
+            if not phone_pattern.match(phone):
+                phone = 'Invalid phone'
+            
+            if not email_pattern.match(email):
+                email = 'Invalid email'
+            
+            
+            line = f"{unique_id}, {name}, {phone}, {email}, {notes}\n"
+            f.write(line)
+            print(f"Contact {unique_id} exported successfully.")
